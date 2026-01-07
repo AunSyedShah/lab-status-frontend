@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { labAPI } from '../api/labAPI';
 import { allocationAPI } from '../api/allocationAPI';
+import { timeSlotAPI } from '../api/timeSlotAPI';
 import AllocationModal from '../components/AllocationModal';
 import BatchEditModal from '../components/BatchEditModal';
 
@@ -27,7 +28,7 @@ export default function ScheduleView() {
       setLoading(true);
       const [labsRes, slotsRes, allocRes] = await Promise.all([
         labAPI.getAll(),
-        fetch('http://localhost:3000/api/timeslots').then(r => r.json()),
+        timeSlotAPI.getAll(),
         allocationAPI.getAll()
       ]);
 
