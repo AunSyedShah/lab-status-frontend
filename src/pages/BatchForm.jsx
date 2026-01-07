@@ -96,10 +96,16 @@ export default function BatchForm() {
         code: formData.code,
         faculty: formData.faculty,
         currentSemester: formData.currentSemester,
-        currentBook: formData.currentBook || undefined,
-        upcomingBook: formData.upcomingBook || undefined,
         numberOfStudents: formData.numberOfStudents ? parseInt(formData.numberOfStudents) : 0
       };
+
+      // Only include book fields if they have values
+      if (formData.currentBook && formData.currentBook.trim()) {
+        submitData.currentBook = formData.currentBook;
+      }
+      if (formData.upcomingBook && formData.upcomingBook.trim()) {
+        submitData.upcomingBook = formData.upcomingBook;
+      }
 
       if (id) {
         await batchAPI.update(id, submitData);
