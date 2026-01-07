@@ -34,6 +34,11 @@ export default function Navbar() {
                 Batches
               </Link>
             </li>
+            <li>
+              <Link to="/timeslots" className="hover:text-blue-200 transition">
+                Time Slots
+              </Link>
+            </li>
           </ul>
         </div>
       </div>

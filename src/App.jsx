@@ -10,6 +10,8 @@ import BookList from './pages/BookList';
 import BookForm from './pages/BookForm';
 import BatchList from './pages/BatchList';
 import BatchForm from './pages/BatchForm';
+import TimeSlotList from './pages/TimeSlotList';
+import TimeSlotForm from './pages/TimeSlotForm';
 import './App.css';
 
 function App() {
@@ -31,6 +33,9 @@ function App() {
         <Route path="/batches" element={<BatchList />} />
         <Route path="/batches/create" element={<BatchForm />} />
         <Route path="/batches/:id/edit" element={<BatchForm />} />
+        <Route path="/timeslots" element={<TimeSlotList />} />
+        <Route path="/timeslots/create" element={<TimeSlotForm />} />
+        <Route path="/timeslots/:id/edit" element={<TimeSlotForm />} />
       </Routes>
     </Router>
   );
