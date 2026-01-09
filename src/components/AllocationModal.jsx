@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
-import { batchAPI } from '../api/batchAPI';
+import { useState } from 'react';
 import { allocationAPI } from '../api/allocationAPI';
+import { useReferenceData } from '../context/useReferenceData';
 
 export default function AllocationModal({
   lab,
@@ -11,25 +11,12 @@ export default function AllocationModal({
   onAllocationAdded,
   onAllocationRemoved
 }) {
-  const [batches, setBatches] = useState([]);
+  const { batches } = useReferenceData();
   const [selectedBatch, setSelectedBatch] = useState(
     existingAllocation?.batch._id || ''
   );
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-
-  useEffect(() => {
-    fetchBatches();
-  }, []);
-
-  const fetchBatches = async () => {
-    try {
-      const response = await batchAPI.getAll();
-      setBatches(response.data || []);
-    } catch (err) {
-      setError('Failed to load batches: ' + err.message);
-    }
-  };
 
   const handleAssign = async () => {
     if (!selectedBatch) {

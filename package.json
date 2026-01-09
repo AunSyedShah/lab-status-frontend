@@ -5,9 +5,17 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:prod": "VITE_APP_ENV=production vite",
+    "dev:prod:win": "set VITE_APP_ENV=production && vite",
     "build": "vite build",
+    "build:dev": "VITE_APP_ENV=development vite build",
+    "build:dev:win": "set VITE_APP_ENV=development && vite build",
+    "build:prod": "VITE_APP_ENV=production vite build",
+    "build:prod:win": "set VITE_APP_ENV=production && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "preview:prod": "VITE_APP_ENV=production vite preview",
+    "preview:prod:win": "set VITE_APP_ENV=production && vite preview"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.1.18",

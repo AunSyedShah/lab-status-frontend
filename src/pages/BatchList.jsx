@@ -1,39 +1,36 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { batchAPI } from '../api/batchAPI';
+import { useReferenceData } from '../context/useReferenceData';
 
 export default function BatchList() {
-  const [batches, setBatches] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const { batches, refreshBatches } = useReferenceData();
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
-
-  useEffect(() => {
-    fetchBatches();
-  }, []);
-
-  const fetchBatches = async () => {
-    try {
-      setLoading(true);
-      const response = await batchAPI.getAll();
-      setBatches(response.data || []);
-      setError(null);
-    } catch (err) {
-      setError(err.message);
-      setBatches([]);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleDelete = async (id) => {
     if (window.confirm('Are you sure you want to delete this batch?')) {
       try {
         await batchAPI.delete(id);
-        setBatches(batches.filter(batch => batch._id !== id));
+        // Refresh context data to reflect deletion
+        await refreshBatches();
+        setError(null);
       } catch (err) {
-        setError(err.message);
+        setError(err.message || 'Failed to delete batch');
       }
+    }
+  };
+
+  const handleRefresh = async () => {
+    try {
+      setLoading(true);
+      await refreshBatches();
+      setError(null);
+    } catch {
+      setError('Failed to refresh batches');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -42,12 +39,21 @@ export default function BatchList() {
       <div className="max-w-6xl mx-auto">
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-bold text-gray-900">Batches</h1>
-          <button
-            onClick={() => navigate('/batches/create')}
-            className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-          >
-            Add Batch
-          </button>
+          <div className="flex gap-2">
+            <button
+              onClick={handleRefresh}
+              disabled={loading}
+              className="bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white font-bold py-2 px-4 rounded transition"
+            >
+              {loading ? 'Refreshing...' : 'Refresh'}
+            </button>
+            <button
+              onClick={() => navigate('/batches/create')}
+              className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+            >
+              Add Batch
+            </button>
+          </div>
         </div>
 
         {error && (

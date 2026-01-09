@@ -1,39 +1,36 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { timeSlotAPI } from '../api/timeSlotAPI';
+import { useReferenceData } from '../context/useReferenceData';
 
 export default function TimeSlotList() {
-  const [timeSlots, setTimeSlots] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const { timeSlots, refreshTimeSlots } = useReferenceData();
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
-
-  useEffect(() => {
-    fetchTimeSlots();
-  }, []);
-
-  const fetchTimeSlots = async () => {
-    try {
-      setLoading(true);
-      const response = await timeSlotAPI.getAll();
-      setTimeSlots(response.data || []);
-      setError(null);
-    } catch (err) {
-      setError(err.message);
-      setTimeSlots([]);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleDelete = async (id) => {
     if (window.confirm('Are you sure you want to delete this time slot?')) {
       try {
         await timeSlotAPI.delete(id);
-        setTimeSlots(timeSlots.filter(slot => slot._id !== id));
+        // Refresh context data to reflect deletion
+        await refreshTimeSlots();
+        setError(null);
       } catch (err) {
-        setError(err.message);
+        setError(err.message || 'Failed to delete time slot');
       }
+    }
+  };
+
+  const handleRefresh = async () => {
+    try {
+      setLoading(true);
+      await refreshTimeSlots();
+      setError(null);
+    } catch {
+      setError('Failed to refresh time slots');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -42,12 +39,21 @@ export default function TimeSlotList() {
       <div className="max-w-6xl mx-auto">
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-bold text-gray-900">Time Slots</h1>
-          <button
-            onClick={() => navigate('/timeslots/create')}
-            className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-          >
-            Add Time Slot
-          </button>
+          <div className="flex gap-2">
+            <button
+              onClick={handleRefresh}
+              disabled={loading}
+              className="bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white font-bold py-2 px-4 rounded transition"
+            >
+              {loading ? 'Refreshing...' : 'Refresh'}
+            </button>
+            <button
+              onClick={() => navigate('/timeslots/create')}
+              className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+            >
+              Add Time Slot
+            </button>
+          </div>
         </div>
 
         {error && (

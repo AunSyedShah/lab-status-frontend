@@ -1,39 +1,36 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { facultyAPI } from '../api/facultyAPI';
+import { useReferenceData } from '../context/useReferenceData';
 
 export default function FacultyList() {
-  const [faculties, setFaculties] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const { faculties, refreshFaculties } = useReferenceData();
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
-
-  useEffect(() => {
-    fetchFaculties();
-  }, []);
-
-  const fetchFaculties = async () => {
-    try {
-      setLoading(true);
-      const response = await facultyAPI.getAll();
-      setFaculties(response.data || []);
-      setError(null);
-    } catch (err) {
-      setError(err.message);
-      setFaculties([]);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleDelete = async (id) => {
     if (window.confirm('Are you sure you want to delete this faculty?')) {
       try {
         await facultyAPI.delete(id);
-        setFaculties(faculties.filter(f => f._id !== id));
+        // Refresh context data to reflect deletion
+        await refreshFaculties();
+        setError(null);
       } catch (err) {
-        setError(err.message);
+        setError(err.message || 'Failed to delete faculty');
       }
+    }
+  };
+
+  const handleRefresh = async () => {
+    try {
+      setLoading(true);
+      await refreshFaculties();
+      setError(null);
+    } catch {
+      setError('Failed to refresh faculties');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -42,12 +39,21 @@ export default function FacultyList() {
       <div className="max-w-6xl mx-auto">
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-bold text-gray-900">Faculties</h1>
-          <button
-            onClick={() => navigate('/faculties/create')}
-            className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-          >
-            Add Faculty
-          </button>
+          <div className="flex gap-2">
+            <button
+              onClick={handleRefresh}
+              disabled={loading}
+              className="bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white font-bold py-2 px-4 rounded transition"
+            >
+              {loading ? 'Refreshing...' : 'Refresh'}
+            </button>
+            <button
+              onClick={() => navigate('/faculties/create')}
+              className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+            >
+              Add Faculty
+            </button>
+          </div>
         </div>
 
         {error && (

@@ -1,7 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { batchAPI } from '../api/batchAPI';
-import { facultyAPI } from '../api/facultyAPI';
-import { bookAPI } from '../api/bookAPI';
+import { useReferenceData } from '../context/useReferenceData';
 
 export default function BatchEditModal({
   allocation,
@@ -9,6 +8,7 @@ export default function BatchEditModal({
   onBatchUpdated
 }) {
   const batch = allocation.batch;
+  const { faculties, books } = useReferenceData();
   const [formData, setFormData] = useState({
     code: batch.code,
     faculty: batch.faculty?._id || '',
@@ -17,28 +17,9 @@ export default function BatchEditModal({
     upcomingBook: batch.upcomingBook?._id || '',
     numberOfStudents: batch.numberOfStudents || ''
   });
-  const [faculties, setFaculties] = useState([]);
-  const [books, setBooks] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
-
-  useEffect(() => {
-    fetchSelectionData();
-  }, []);
-
-  const fetchSelectionData = async () => {
-    try {
-      const [facultyRes, bookRes] = await Promise.all([
-        facultyAPI.getAll(),
-        bookAPI.getAll()
-      ]);
-      setFaculties(facultyRes.data || []);
-      setBooks(bookRes.data || []);
-    } catch (err) {
-      setError('Failed to load data');
-    }
-  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;

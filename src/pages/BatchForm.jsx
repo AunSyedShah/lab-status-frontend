@@ -1,12 +1,12 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { batchAPI } from '../api/batchAPI';
-import { facultyAPI } from '../api/facultyAPI';
-import { bookAPI } from '../api/bookAPI';
+import { useReferenceData } from '../context/useReferenceData';
 
 export default function BatchForm() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { faculties, books } = useReferenceData();
   const [formData, setFormData] = useState({
     code: '',
     faculty: '',
@@ -15,33 +15,11 @@ export default function BatchForm() {
     upcomingBook: '',
     numberOfStudents: ''
   });
-  const [faculties, setFaculties] = useState([]);
-  const [books, setBooks] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
 
-  useEffect(() => {
-    fetchSelectionData();
-    if (id) {
-      fetchBatch();
-    }
-  }, [id]);
-
-  const fetchSelectionData = async () => {
-    try {
-      const [facultyRes, bookRes] = await Promise.all([
-        facultyAPI.getAll(),
-        bookAPI.getAll()
-      ]);
-      setFaculties(facultyRes.data || []);
-      setBooks(bookRes.data || []);
-    } catch (err) {
-      setError('Failed to load faculties and books');
-    }
-  };
-
-  const fetchBatch = async () => {
+  const fetchBatch = useCallback(async () => {
     try {
       setLoading(true);
       const response = await batchAPI.getById(id);
@@ -60,7 +38,13 @@ export default function BatchForm() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [id]);
+
+  useEffect(() => {
+    if (id) {
+      fetchBatch();
+    }
+  }, [id, fetchBatch]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
